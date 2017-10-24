@@ -18,5 +18,19 @@
   "bugs": {
     "url": "https://github.com/yangfeng-gh/Gulp/issues"
   },
-  "homepage": "https://github.com/yangfeng-gh/Gulp#readme"
+  "homepage": "https://github.com/yangfeng-gh/Gulp#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-changed": "^3.1.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-imagemin": "^3.4.0",
+    "gulp-livereload": "^3.8.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-ruby-sass": "^2.1.1",
+    "gulp-sourcemaps": "^2.6.1",
+    "gulp-uglify": "^3.0.0",
+    "gulp-webserver": "^0.9.1",
+    "imagemin-pngquant": "^5.0.1"
+  }
 }
