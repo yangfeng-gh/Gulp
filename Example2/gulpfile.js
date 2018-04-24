@@ -14,8 +14,8 @@ var sass = require('gulp-ruby-sass'), // CSS预处理/Sass编译
 	sourcemaps = require('gulp-sourcemaps'), // 来源地图
 	changed = require('gulp-changed'), // 只操作有过修改的文件
 	concat = require("gulp-concat"), // 文件合并
-	clean = require('gulp-clean'); // 文件清理
-
+	clean = require('gulp-clean'), // 文件清理
+	runSequence = require('run-sequence'); // 任务序列
 /* = 全局设置
 -------------------------------------------------------------- */
 var srcPath = {
@@ -42,12 +42,13 @@ gulp.task('html', function () {
 // 样式处理
 gulp.task('sass', function () {
 	return sass(srcPath.css + '/**/*.scss', {
+			verbose: true,
 			style: 'compact',
 			sourcemap: true,
 			precision: 6,
-			stopOnError: true,
+			stopOnError: true
 			// cacheLocation: './',
-			loadPath: ['library', '../../shared-components']
+			// loadPath: ['library', '../../shared-components']
 		}) // 指明源文件路径、并进行文件匹配（编译风格：简洁格式）
 		.on('error', sass.logError)
 		// for inline sourcemaps
@@ -58,7 +59,7 @@ gulp.task('sass', function () {
 		// 	return '/src/css' + sourcePath;
 		// }))
 		// for file sourcemaps
-		.pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: '../../src1'}))
+		.pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: '../src'}))
 		.pipe(gulp.dest(destPath.css)); // 输出路径
 });
 // JS文件压缩&重命名
@@ -121,20 +122,25 @@ gulp.task('default', ['webserver', 'watch']);
 -------------------------------------------------------------- */
 // 清理文件
 gulp.task('clean', function () {
-	return gulp.src([destPath.css + '/maps', destPath.script + '/maps'], {
+	return gulp.src([destPath.html, '.sass-cache'], {
 			read: false
-		}) // 清理maps文件
+		}) 
 		.pipe(clean());
 });
 // 样式处理
 gulp.task('sassRelease', function () {
-	return sass(srcPath.css, {
-			style: 'compressed'
+	return sass(srcPath.css + '**/*.scss', {
+			style: 'compressed',
+			verbose: true,
+			style: 'compact',
+			sourcemap: true,
+			precision: 6,
+			stopOnError: true
 		}) // 指明源文件路径、并进行文件匹配（编译风格：压缩）
 		.on('error', function (err) {
 			console.error('Error!', err.message); // 显示错误信息
 		})
-		.pipe(gulp.dest(destPath.css)); // 输出路径
+		.pipe(gulp.dest(destPath.html)); // 输出路径
 });
 // 脚本压缩&重命名
 gulp.task('scriptRelease', function () {
@@ -142,15 +148,17 @@ gulp.task('scriptRelease', function () {
 		.pipe(rename({
 			suffix: '.min'
 		})) // 重命名
-		.pipe(uglify({
-			preserveComments: 'some'
-		})) // 使用uglify进行压缩，并保留部分注释
+		.pipe(uglify())
 		.pipe(gulp.dest(destPath.script)); // 输出路径
 });
 // 打包发布
-gulp.task('release', ['clean'], function () { // 开始任务前会先执行[clean]任务
-	return gulp.start('sassRelease', 'scriptRelease', 'images'); // 等[clean]任务执行完毕后再执行其他任务
-});
+// gulp.task('release', ['clean'], function () { // 开始任务前会先执行[clean]任务
+// 	return gulp.run('html', 'sassRelease', 'concat', 'scriptRelease', 'images'); // 等[clean]任务执行完毕后再执行其他任务
+// });
+
+gulp.task('release', function(cb) {
+	runSequence('clean', 'html', ['sassRelease', 'concat', 'scriptRelease', 'images'], cb);
+})
 
 /* = 帮助提示( Help )
 -------------------------------------------------------------- */
